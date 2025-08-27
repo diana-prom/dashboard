@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.2/css/all.min.css" />
+    <link rel="stylesheet" href="../client/assets/css/style.css" />
+    <link rel="icon" type="image/x-icon" href="../public/favicon.ico" />
+    <title> Nutri-Dashboard</title>
+    <script src="../client/app/script.js" defer></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1 role="text">Nutri-Dashboard</h1>
+      <form class="form-control" id="form">
+        <i id="warning-icon" class="fas fa-exclamation-circle"></i>
+        <input type="text" id="textBox" placeholder="search by keyword" />
+        <button aria-label="delete text" role="button" id="clear-btn" class="clear-btn" type="reset">
+          <i class="fa fa-times"></i>
+        </button>
+        <label for="search-btn">
+          <button aria-label="search" role="button" id="search-btn" class="search-btn" type="submit">
+            <i class="fas fa-search"></i>
+          </button>
+        </label>
+      </form>
+      <small id="error" class="error">Error message</small>
+    </div>
+    <div class="f2container">
+      <h2 aria-live="polite" id="mytext">Nutrition Facts:</h2>
+    </div>
+    <div id="result-heading"></div>
+    <div class="limiter">
+      <div class="container-table100">
+        <div class="wrap-table100">
+          <div class="table100">
+            <table>
+              <thead>
+                <tr>
+                  <th class="column1">Information</th>
+                  <th class="column2">Value</th>
+                  <th class="column3">Other</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr id="firstRow" class="firstRow">
+                  <td class="column1">Nutrient</td>
+                  <td class="column2"></td>
+                  <td class="column3"></td>
+                </tr>
+                <tr id="secondRow" class="secondRow">
+                  <td class="column1">Food Category</td>
+                  <td class="column2"></td>
+                  <td class="column3"></td>
+                </tr>
+                <tr id="thirdtRow" class="thirdtRow">
+                  <td class="column1">Food nutrient conversion</td>
+                  <td class="column2"></td>
+                  <td class="column3"></td>
+                </tr>
+                <tr id="fourthtRow" class="fourthtRow">
+                  <td class="column1">Food calorie conversion</td>
+                  <td class="column2"></td>
+                  <td class="column3"></td>
+                </tr>
+                <tr id="fifthtRow" class="fifthtRow">
+                  <td class="column1">Food protein conversion factor</td>
+                  <td class="column2"></td>
+                  <td class="column3"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
