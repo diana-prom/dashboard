@@ -1,49 +1,70 @@
 const searchButton = document.getElementById('search-btn');
 const clearButton = document.getElementById('clear-btn');
 const textField = document.getElementById('textBox');
-const error = document.getElementById('error');
+const errorMessage = document.getElementById('error');
+const resultText = document.getElementById('mytext');
+const warningIcon = document.getElementById('warning-icon'); 
 
 
-if (searchButton) {
-	searchButton.addEventListener('click', (event) => {
-		event.preventDefault(); // Prevents page reload on form submit
-		var userInput = textField.value;
-		clearButton.style.display = 'block';
-		checkTextArea(userInput);
+const showElement = (el) => el && (el.style.display = 'block');
+const hideElement = (el) => el && (el.style.display = 'none');
 
-		document.getElementById("mytext").innerHTML = "Nutrition Facts: " + userInput;
-
-	});
-}
-if (clearButton) {
-	clearButton.addEventListener('click', (event) => {
-		clearButton.style.display = 'none';
-	})
+//Show error state
+function showError() {
+  if (!errorMessage || !textField) return;
+  errorMessage.textContent = 'Required!';
+  errorMessage.style.display = 'block';
+  textField.classList.add('invalid');
+  warningIcon.style.display = 'block';//added
+  warningIcon?.classList.add('show-icon');
 }
 
-/*
-Validates input field
-*/
-
-function hideMessage(error) {
-	error.style.display = 'none';
+// Hide error state
+function hideError() {
+  if (!errorMessage || !textField) return;
+  errorMessage.textContent = '';
+  errorMessage.style.display = 'none';
+  textField.classList.remove('invalid');
+  warningIcon.style.display = 'none'; //added
+  warningIcon?.classList.remove('show-icon');
 }
 
-function showMessage(error) {
-	error.style.display = 'block';
-	textField.classList.add("invalid");
-	error.innerHTML = "Required!"
+// Validation logic
+function validateInput(inputValue) {
+  const isEmpty = inputValue.trim() === '';
+  if (isEmpty) {
+    showError();
+    hideElement(clearButton);
+    return false;
+  } else {
+    hideError();
+    showElement(clearButton);
+    return true;
+  }
 }
 
-function checkTextArea(fieldValue) {
+// Event: Search button clicked
+searchButton?.addEventListener('click', (e) => {
+  e.preventDefault();
 
-	if (fieldValue.trim() === '') {
-		showMessage(error);
-		clearButton.style.display = 'none';
+  const userInput = textField?.value ?? '';
 
-	} else {
-		clearButton.style.display = 'block';
-		hideMessage(error);
-		textField.classList.remove("invalid");
-	}
-}
+  if (validateInput(userInput)) {
+    if (resultText) {
+      resultText.innerHTML = `Nutrition Facts: ${userInput}`;
+    }
+  }
+});
+
+// Event: Clear button clicked
+clearButton?.addEventListener('click', () => {
+  hideElement(clearButton);
+  hideError();
+  if (textField) {
+    textField.value = '';
+    textField.classList.remove('invalid');
+  }
+  if (resultText) {
+    resultText.innerHTML = 'Nutrition Facts:';
+  }
+});
