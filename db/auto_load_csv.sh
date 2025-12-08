@@ -1,12 +1,11 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-
 # ---------- Configuration ----------
 CONTAINER_NAME="mysql8"
 DB_NAME="Nutrition_Facts"
 MYSQL_USER="root"
-MYSQL_PASSWORD=PASSWORD
+#MYSQL_PASSWORD=PASSWORD
 DOCKER_CSV_DIR="/var/lib/mysql-files"
 # ----------------------------------
 
@@ -19,15 +18,13 @@ DOCKER_CSV_DIR="/var/lib/mysql-files"
 trap handle_error ERR
 
 echo "Calling stored procedure to create tables..."
-docker exec -i $CONTAINER_NAME mysql -u $MYSQL_USER -p"$MYSQL_PASSWORD" -e "USE $DB_NAME; CALL CREATE_TABLES();"
+docker exec -it $CONTAINER_NAME mysql -u $MYSQL_USER -p -e "USE $DB_NAME; CALL CREATE_TABLES();"
 
 echo "Cleaning CSV line endings inside Docker..."
 docker exec -i $CONTAINER_NAME bash -c "for f in $DOCKER_CSV_DIR/*.csv; do sed -i 's/\r\$//' \$f; done"
 
 echo "Loading CSVs into tables..."
-
-docker exec -i $CONTAINER_NAME mysql -u $MYSQL_USER -p"$MYSQL_PASSWORD" -e "
-
+docker exec -it $CONTAINER_NAME mysql -u $MYSQL_USER -p -e "
 USE $DB_NAME;
 
 -- Load FOOD table
@@ -125,5 +122,4 @@ SET
     value = NULLIF(@n2, '');
 
 "
-
 echo "DONE! All tables are created and CSVs are loaded."
