@@ -1,4 +1,6 @@
 #!/bin/bash
+set -Eeuo pipefail
+
 
 # ---------- Configuration ----------
 CONTAINER_NAME="mysql8"
@@ -7,6 +9,14 @@ MYSQL_USER="root"
 MYSQL_PASSWORD=PASSWORD
 DOCKER_CSV_DIR="/var/lib/mysql-files"
 # ----------------------------------
+
+ handle_error() {
+    local exit_code=$?
+    echo "An error occurred in the script (exit code: $exit_code)"
+    exit $exit_code
+}
+
+trap handle_error ERR
 
 echo "Calling stored procedure to create tables..."
 docker exec -i $CONTAINER_NAME mysql -u $MYSQL_USER -p"$MYSQL_PASSWORD" -e "USE $DB_NAME; CALL CREATE_TABLES();"
@@ -17,6 +27,7 @@ docker exec -i $CONTAINER_NAME bash -c "for f in $DOCKER_CSV_DIR/*.csv; do sed -
 echo "Loading CSVs into tables..."
 
 docker exec -i $CONTAINER_NAME mysql -u $MYSQL_USER -p"$MYSQL_PASSWORD" -e "
+
 USE $DB_NAME;
 
 -- Load FOOD table
