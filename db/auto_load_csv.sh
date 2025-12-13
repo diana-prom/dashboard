@@ -5,121 +5,126 @@ set -Eeuo pipefail
 CONTAINER_NAME="mysql8"
 DB_NAME="Nutrition_Facts"
 MYSQL_USER="root"
-#MYSQL_PASSWORD=PASSWORD
+MYSQL_PASSWORD=PASSWORD
 DOCKER_CSV_DIR="/var/lib/mysql-files"
+NORMALIZE_SCRIPT="/tmp/normalize_csvs.sh"
 # ----------------------------------
 
  handle_error() {
     local exit_code=$?
-    echo "An error occurred in the script (exit code: $exit_code)"
+    echo "[ERROR] Script failed with exit code $exit_code"
     exit $exit_code
 }
 
 trap handle_error ERR
 
-echo "Calling stored procedure to create tables..."
-docker exec -it $CONTAINER_NAME mysql -u $MYSQL_USER -p -e "USE $DB_NAME; CALL CREATE_TABLES();"
+echo "[INFO] Creating tables via stored procedure..."
+docker exec -i $CONTAINER_NAME mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -e "USE $DB_NAME; CALL CREATE_TABLES();"
 
-echo "Cleaning CSV line endings inside Docker..."
-docker exec -i $CONTAINER_NAME bash -c "for f in $DOCKER_CSV_DIR/*.csv; do sed -i 's/\r\$//' \$f; done"
+echo "[INFO] Copying normalization script into container..."
+docker cp normalize_csvs.sh "$CONTAINER_NAME":"$NORMALIZE_SCRIPT"
+docker exec -i "$CONTAINER_NAME" chmod +x "$NORMALIZE_SCRIPT"
 
-echo "Loading CSVs into tables..."
-docker exec -it $CONTAINER_NAME mysql -u $MYSQL_USER -p -e "
+echo "[INFO] Normalizing CSV line endings and empty fields inside container..."
+docker exec -i "$CONTAINER_NAME" "$NORMALIZE_SCRIPT"
+
+echo "[INFO] Loading CSVs into parent tables: food_category, nutrient, food..."
+docker exec -i "$CONTAINER_NAME" mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" <<EOSQL
 USE $DB_NAME;
 
--- Load FOOD table
-LOAD DATA INFILE '$DOCKER_CSV_DIR/food.csv'
-INTO TABLE food
+-- Load food_category first
+LOAD DATA INFILE '$DOCKER_CSV_DIR/food_category.csv'
+INTO TABLE food_category
 FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(@n1,@n2,@n3,@n4,@n5,@n6,@n7,@n8,@n9,@n10,@n11,@n12,@n13,@n14)
-SET
-    fdc_id = @n1,
-    data_type = NULLIF(@n2, ''),
-    description = NULLIF(@n3, ''),
-    food_category_id = NULLIF(@n4, '');
+(id, code, description);
 
--- Load NUTRIENT table
+-- Load nutrient 
 LOAD DATA INFILE '$DOCKER_CSV_DIR/nutrient.csv'
 INTO TABLE nutrient
 FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
 (@n1,@n2,@n3,@n4,@n5)
 SET
     id = @n1,
-    name = NULLIF(@n2, ''),
-    unit_name = NULLIF(@n3, ''),
-    nutrient_nbr = NULLIF(@n4, ''),
-    rank_order = NULLIF(@n5, '');
+    name = NULLIF(@n2,''),
+    unit_name = NULLIF(@n3,''),
+    nutrient_nbr = NULLIF(@n4,''),
+    rank_order = NULLIF(@n5,'');
 
- -- Load FOOD_NUTRIENT table
+-- Load food 
+LOAD DATA INFILE '$DOCKER_CSV_DIR/food.csv'
+INTO TABLE food
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(fdc_id, data_type, description, @food_category_id, publication_date)
+SET 
+    food_category_id = NULLIF(TRIM(@food_category_id), '');
+
+-- Load food_nutrient 
 LOAD DATA INFILE '$DOCKER_CSV_DIR/food_nutrient.csv'
 INTO TABLE food_nutrient
 FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(@n1,@n2,@n3,@n4,@n5,@n6,@n7,@n8,@n9,@n10,@n11)
+(@id, @fdc_id, @nutrient_id, @amount)
 SET
-    id = @n1,
-    fdc_id = @n2,
-    nutrient_id = @n3,
-    amount = NULLIF(@n4, '');
+    id = @id,
+    fdc_id = @fdc_id,
+    nutrient_id = @nutrient_id,
+    amount = NULLIF(TRIM(@amount), '');
 
--- Load FOOD_CATEGORY table
-LOAD DATA INFILE '$DOCKER_CSV_DIR/food_category.csv'
-INTO TABLE food_category
-FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
-LINES TERMINATED BY '\n'
-IGNORE 1 ROWS
-(@n1,@n2,@n3)
-SET
-    category_id = @n1,
-    code_number = @n2,
-    category_description = NULLIF(@n3, '');
-
--- Load FOOD_NUTRIENT_CONVERSION_FACTOR
+-- Loading food_nutrient_conversion_factor
 LOAD DATA INFILE '$DOCKER_CSV_DIR/food_nutrient_conversion_factor.csv'
 INTO TABLE food_nutrient_conversion_factor
 FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(@n1,@n2)
+(@id, @fdc_id)
 SET
-    id = @n1,
-    fdc_id = @n2;
+    id = @id,
+    fdc_id = NULLIF(@fdc_id, '');
 
--- Load FOOD_CALORIE_CONVERSION_FACTOR table
+-- Load food_calorie_conversion_factor 
 LOAD DATA INFILE '$DOCKER_CSV_DIR/food_calorie_conversion_factor.csv'
 INTO TABLE food_calorie_conversion_factor
 FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(@n1,@n2,@n3,@n4)
-SET
-    food_nutrient_conversion_factor_id = @n1,
-    protein_value = NULLIF(@n2, ''),
-    fat_value = NULLIF(@n3, ''),
-    carbohydrate_value = NULLIF(@n4, '');
-    
--- Load FOOD_PROTEIN_CONVERSTION_FACTOR
+(food_nutrient_conversion_factor_id, protein_value, fat_value, carbohydrate_value);
+-- [INFO] food_nutrient.csv loaded successfully!"
+
 LOAD DATA INFILE '$DOCKER_CSV_DIR/food_protein_conversion_factor.csv'
 INTO TABLE food_protein_conversion_factor
 FIELDS TERMINATED BY ','
-ENCLOSED BY '\"'
+ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS
-(@n1,@n2)
-SET
-    food_protein_conversion_factor_ID = @n1,
-    value = NULLIF(@n2, '');
+(food_protein_conversion_factor_id, value);
 
-"
-echo "DONE! All tables are created and CSVs are loaded."
+/*
+-- Load CSV into staging table
+LOAD DATA INFILE '$DOCKER_CSV_DIR/food_nutrient_conversion_factor.csv'
+INTO TABLE staging_food_nutrient_conversion_factor
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(@id, @fdc_id)
+SET
+    id = @id,
+    fdc_id = NULLIF(@fdc_id, '');
+*/
+
+EOSQL
+
+echo "[INFO] All tables loaded successfully!"
