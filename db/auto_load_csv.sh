@@ -2,12 +2,13 @@
 set -Eeuo pipefail
 
 # ---------- Configuration ----------
-CONTAINER_NAME="mysql8"
+CONTAINER_NAME="mysql80"
 DB_NAME="Nutrition_Facts"
 MYSQL_USER="root"
-MYSQL_PASSWORD=PASSWORD
+MYSQL_PASSWORD="${MYSQL_ROOT_PASSWORD}"
 DOCKER_CSV_DIR="/var/lib/mysql-files"
-NORMALIZE_SCRIPT="/tmp/normalize_csvs.sh"
+NORMALIZE_SCRIPT="/root/normalize_csvs.sh"
+SQL_PROC="/tmp/create_tables.sql"
 # ----------------------------------
 
  handle_error() {
@@ -18,19 +19,30 @@ NORMALIZE_SCRIPT="/tmp/normalize_csvs.sh"
 
 trap handle_error ERR
 
-echo "[INFO] Creating tables via stored procedure..."
-docker exec -i $CONTAINER_NAME mysql -u $MYSQL_USER -p$MYSQL_PASSWORD -e "USE $DB_NAME; CALL CREATE_TABLES();"
+echo "[INFO] Creating database if it doesn't exist..."
+docker exec -i $CONTAINER_NAME mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
 
-echo "[INFO] Copying normalization script into container..."
-docker cp normalize_csvs.sh "$CONTAINER_NAME":"$NORMALIZE_SCRIPT"
+echo "[INFO] Copying SQL procedure into container..."
+docker cp db/CREATE_TABLES.sql "$CONTAINER_NAME":"$SQL_PROC"
+
+echo "[INFO] Creating stored procedure..."
+docker exec -i "$CONTAINER_NAME" mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$DB_NAME" < db/CREATE_TABLES.sql
+
+echo "[INFO] Calling CREATE_TABLES procedure..."
+docker exec -i "$CONTAINER_NAME" mysql -u$MYSQL_USER -p$MYSQL_PASSWORD -e "USE $DB_NAME; CALL CREATE_TABLES();"
+
+echo "[INFO] Copying normalization script into container.."
+docker cp db/normalize_csvs.sh "$CONTAINER_NAME":"$NORMALIZE_SCRIPT"
+
+echo "[INFO] Making normalization script executable..."
 docker exec -i "$CONTAINER_NAME" chmod +x "$NORMALIZE_SCRIPT"
 
-echo "[INFO] Normalizing CSV line endings and empty fields inside container..."
+echo "[INFO] Normalizing CSVs inside container..."
 docker exec -i "$CONTAINER_NAME" "$NORMALIZE_SCRIPT"
 
 echo "[INFO] Loading CSVs into parent tables: food_category, nutrient, food..."
-docker exec -i "$CONTAINER_NAME" mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" <<EOSQL
-USE $DB_NAME;
+docker exec -i "$CONTAINER_NAME" mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$DB_NAME"<<EOSQL
+
 
 -- Load food_category first
 LOAD DATA INFILE '$DOCKER_CSV_DIR/food_category.csv'
