@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Maven / Spring Boot
+target/
+*.log
