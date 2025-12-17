@@ -5,3 +5,15 @@
 # Maven / Spring Boot
 target/
 *.log
+
+# IntelliJ
+.idea/
+*.iml
+
+# Local scripts or folders you don't want in Git
+-d
+-e
+-p
+creatingScript.sql
+db/csv/
+src/data/
