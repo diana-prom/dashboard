@@ -1,9 +1,9 @@
-package com.dashboard.nutrition_service;
+package com.dashboard.nutritionservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(classes = NutritionServiceApplication.class)
 class NutritionServiceApplicationTests {
 
 	@Test
