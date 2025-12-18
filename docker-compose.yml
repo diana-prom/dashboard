@@ -10,7 +10,7 @@ services:
      - 3306:3306
     volumes:
      -  mysql-data:/var/lib/mysql
-     - .mysql-logs:/var/log/mysql
+     - ./mysql-logs:/var/log/mysql
      - ./db/init:/docker-entrypoint-initdb.d
      - ./db/csv:/var/lib/mysql-files
     networks:
@@ -24,7 +24,7 @@ services:
     
   backend:
     build:
-      context: ./backend
+      context: ./backend/app
       dockerfile: Dockerfile  
     container_name: nutrition_backend
     restart: always
@@ -32,10 +32,14 @@ services:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/Nutrition_Facts  
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/Nutrition_Facts?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC  
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: secretsauce1
       SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT: -1
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      
+
     ports:
       - "8080:8080"  
     networks:
@@ -49,7 +53,6 @@ services:
 
 volumes:
   mysql-data:
-  mysql-files:
 
 networks:
   nutrition-network:
