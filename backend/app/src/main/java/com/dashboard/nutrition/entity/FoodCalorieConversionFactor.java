@@ -1,7 +1,6 @@
 package com.dashboard.nutrition.entity;
 
 import jakarta.persistence.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "food_calorie_conversion_factor")
@@ -12,31 +11,54 @@ public class FoodCalorieConversionFactor {
     private Integer id;
 
     @Column(name = "protein_value")
-    private BigDecimal proteinValue;
+    private Double proteinValue;
+
     @Column(name = "fat_value")
-    private BigDecimal fatValue;
+    private Double fatValue;
+
     @Column(name = "carbohydrate_value")
-    private BigDecimal carbohydrateValue;
+    private Double carbohydrateValue;
 
     @OneToOne
     @MapsId
     @JoinColumn(name = "food_nutrient_conversion_factor_id")
     private FoodNutrientConversionFactor nutrientConversionFactor;
 
-    public BigDecimal getProteinValue(){
+    public FoodCalorieConversionFactor() {
+    }
+
+    public Double getProteinValue() {
         return proteinValue;
     }
 
-    public BigDecimal getFatValue(){
+    public void setProteinValue(Double proteinValue) {
+        this.proteinValue = proteinValue;
+    }
+
+    public Double getFatValue() {
         return fatValue;
     }
-    public BigDecimal getCarbohydrateValue() {
+
+    public void setFatValue(Double fatValue) {
+        this.fatValue = fatValue;
+    }
+
+    public Double getCarbohydrateValue() {
         return carbohydrateValue;
+    }
+
+    public void setCarbohydrateValue(Double carbohydrateValue) {
+        this.carbohydrateValue = carbohydrateValue;
     }
 
     public FoodNutrientConversionFactor getNutrientConversionFactor() {
         return nutrientConversionFactor;
     }
+
+    public void setNutrientConversionFactor(FoodNutrientConversionFactor nutrientConversionFactor) {
+        this.nutrientConversionFactor = nutrientConversionFactor;
+    }
+
+    public void setCalorieConversionFactor(FoodCalorieConversionFactor c) {
+    }
 }
-
-
