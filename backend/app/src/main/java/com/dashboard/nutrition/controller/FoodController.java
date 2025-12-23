@@ -1,8 +1,7 @@
 package com.dashboard.nutrition.controller;
 
-import com.dashboard.nutrition.entity.Food;
+import com.dashboard.nutrition.dto.FoodDTO;
 import com.dashboard.nutrition.service.FoodService;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,14 +16,28 @@ public class FoodController {
         this.foodService = foodService;
     }
 
-    @GetMapping("/search")
-    public Food getFoodMacros(@RequestParam String name){
-        return foodService.getFoodWithMacros(name);
+    /**
+     * Get all foods
+     */
+    @GetMapping
+    public List<FoodDTO> getAllFoods() {
+        return foodService.getAllFoods();
     }
 
-    @GetMapping("/search/all")
-    public ResponseEntity<List<Food>> searchFood(@RequestParam String name) {
-        List<Food> foods = foodService.searchFoodsWithMacros(name);
-        return ResponseEntity.ok(foods);
+    /**
+     * Get a single food by ID
+     */
+    @GetMapping("/{fdcId}")
+    public FoodDTO getFoodById(@PathVariable Integer fdcId) {
+        return foodService.getFoodById(fdcId);
+    }
+
+    /**
+     * Search best food by description
+     * Example: /api/food/search/best?name=cheddar cheese
+     */
+    @GetMapping("/search/best")
+    public FoodDTO searchBest(@RequestParam String name) {
+        return foodService.searchBestByDescription(name);
     }
 }
