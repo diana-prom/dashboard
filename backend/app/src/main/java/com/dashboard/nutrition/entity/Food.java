@@ -3,27 +3,47 @@ package com.dashboard.nutrition.entity;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "food")
 public class Food {
+
     @Id
     @Column(name = "fdc_id")
     private Integer fdc_id;
-
-    @Column(name = "description")
     private String description;
 
     @JsonManagedReference
-    @OneToOne(mappedBy = "food", fetch = FetchType.LAZY)
-    private FoodNutrientConversionFactor nutrientConversionFactor;
+    @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<FoodNutrientConversionFactor> nutrientConversionFactors = new ArrayList<>();
 
-    public Integer getFdc_id() { return fdc_id;}
-    //public void setFdc_id(Integer fdc_id) {this.fdc_id=fdc_id;}
+    public Integer getFdc_id() {
+        return fdc_id;
+    }
 
-    public String getDescription() { return description;}
-    //public void setDescription(String description) { this.description = description;}
+    public void setFdc_id(Integer fdc_id) {
+        this.fdc_id = fdc_id;
+    }
 
-    public FoodNutrientConversionFactor getNutrientConversionFactor() {
-        return nutrientConversionFactor;
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<FoodNutrientConversionFactor> getNutrientConversionFactors() {
+        return nutrientConversionFactors;
+    }
+
+    public void setNutrientConversionFactors(List<FoodNutrientConversionFactor> nutrientConversionFactors) {
+        this.nutrientConversionFactors = nutrientConversionFactors;
+    }
+
+    public void addNutrientConversionFactor(FoodNutrientConversionFactor nutrient) {
+        nutrient.setFood(this);
     }
 }
