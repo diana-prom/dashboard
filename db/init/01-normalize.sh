@@ -2,6 +2,9 @@
 set -euo pipefail
 
 CSV_DIR="/var/lib/mysql-files"
+
+echo "[INFO] Normalizing CSVs in $CSV_DIR..."
+
 shopt -s nullglob
 
 for f in "$CSV_DIR"/*.csv; do
