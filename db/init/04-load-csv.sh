@@ -7,9 +7,10 @@ MYSQL_USER="root"
 MYSQL_PASSWORD="${MYSQL_ROOT_PASSWORD:-root}"
 DOCKER_CSV_DIR="/var/lib/mysql-files"
 LOG_FILE="/var/log/mysql/init.log"
+# ----------------------------------
+
 mkdir -p "$(dirname "$LOG_FILE")"
 exec > >(tee "$LOG_FILE") 2>&1
-# ----------------------------------
 
 handle_error() {
     local exit_code=$?
