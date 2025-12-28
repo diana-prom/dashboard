@@ -1,10 +1,22 @@
 spring:
   application:
     name: nutrition
-    jpa:
-      show-sql: true
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/Nutrition_Facts?useSSL=false&serverTimezone=UTC}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:none} # update/validate/none depending on env
+    properties:
       hibernate:
-        ddl-auto: validate
-      properties:
-        hibernate:
-          format_sql: true
+        dialect: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.MySQLDialect}
+        format_sql: true
+    show-sql: true
+
+logging:
+  level:
+    com.zaxxer.hikari: ${SPRING_LOGGING_LEVEL_COM_ZAXXER_HIKARI:DEBUG}
