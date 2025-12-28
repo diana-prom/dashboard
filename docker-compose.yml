@@ -7,41 +7,41 @@ services:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: Nutrition_Facts
     ports:
-     - 3306:3306
+      - 3306:3306
     volumes:
-     -  mysql-data:/var/lib/mysql
-     - ./mysql-logs:/var/log/mysql
-     - ./db/init:/docker-entrypoint-initdb.d
-     - ./db/csv:/var/lib/mysql-files
+      - mysql-data:/var/lib/mysql
+      - ./mysql-logs:/var/log/mysql
+      - ./db/init:/docker-entrypoint-initdb.d
+      - ./db/csv:/var/lib/mysql-files
     networks:
-     - nutrition-network
+      - nutrition-network
     healthcheck:
-     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-     interval: 10s
-     retries: 5
-     start_period: 20s
-     timeout: 10s
-    
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
+
   backend:
     build:
       context: ./backend/app
-      dockerfile: Dockerfile  
+      dockerfile: Dockerfile
     container_name: nutrition_backend
     restart: always
     depends_on:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/Nutrition_Facts?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC  
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/Nutrition_Facts?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: secretsauce1
+      SPRING_DATASOURCE_PASSWORD: password
       SPRING_DATASOURCE_HIKARI_INITIALIZATION_FAIL_TIMEOUT: -1
+      SPRING_LOGGING_LEVEL_COM_ZAXXER_HIKARI: DEBUG
       #SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQLDialect
       SPRING_JPA_HIBERNATE_DDL_AUTO: none
-      
-
     ports:
-      - "8080:8080"  
+      - "8080:8080"
     networks:
       - nutrition-network
     healthcheck:
@@ -49,11 +49,24 @@ services:
       interval: 10s
       retries: 5
       start_period: 20s
-      timeout: 10s 
+      timeout: 10s
+
+  frontend:
+    build:
+      context: ./src/client/app
+      dockerfile: Dockerfile
+    container_name: nutrition_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    networks:
+      - nutrition-network
 
 volumes:
   mysql-data:
 
 networks:
   nutrition-network:
-    driver: bridge  
+    driver: bridge
