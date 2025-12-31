@@ -2,6 +2,8 @@ package com.dashboard.nutrition.entity;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "food_calorie_conversion_factor")
 public class FoodCalorieConversionFactor {
@@ -11,15 +13,15 @@ public class FoodCalorieConversionFactor {
     private Integer id;
 
     @Column(name = "protein_value")
-    private Double proteinValue;
+    private BigDecimal proteinValue;
 
     @Column(name = "fat_value")
-    private Double fatValue;
+    private BigDecimal fatValue;
 
     @Column(name = "carbohydrate_value")
-    private Double carbohydrateValue;
+    private BigDecimal carbohydrateValue;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "food_nutrient_conversion_factor_id")
     private FoodNutrientConversionFactor nutrientConversionFactor;
@@ -27,27 +29,20 @@ public class FoodCalorieConversionFactor {
     public FoodCalorieConversionFactor() {
     }
 
-    public Double getProteinValue() {
-        return proteinValue;
-    }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-    public void setProteinValue(Double proteinValue) {
-        this.proteinValue = proteinValue;
-    }
+    public BigDecimal getProteinValue() { return proteinValue; }
 
-    public Double getFatValue() {
-        return fatValue;
-    }
+    public void setProteinValue(BigDecimal proteinValue) { this.proteinValue = proteinValue; }
 
-    public void setFatValue(Double fatValue) {
-        this.fatValue = fatValue;
-    }
+    public BigDecimal getFatValue() { return fatValue; }
 
-    public Double getCarbohydrateValue() {
-        return carbohydrateValue;
-    }
+    public void setFatValue(BigDecimal fatValue) { this.fatValue = fatValue; }
 
-    public void setCarbohydrateValue(Double carbohydrateValue) {
+    public BigDecimal getCarbohydrateValue() { return carbohydrateValue; }
+
+    public void setCarbohydrateValue(BigDecimal carbohydrateValue) {
         this.carbohydrateValue = carbohydrateValue;
     }
 
@@ -57,8 +52,5 @@ public class FoodCalorieConversionFactor {
 
     public void setNutrientConversionFactor(FoodNutrientConversionFactor nutrientConversionFactor) {
         this.nutrientConversionFactor = nutrientConversionFactor;
-    }
-
-    public void setCalorieConversionFactor(FoodCalorieConversionFactor c) {
     }
 }
