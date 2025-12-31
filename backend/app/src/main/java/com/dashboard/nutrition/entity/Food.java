@@ -12,19 +12,23 @@ public class Food {
 
     @Id
     @Column(name = "fdc_id")
-    private Integer fdc_id;
+    private Integer fdcId;
+
     private String description;
+
+    @Column(name = "food_category_id")
+    private Integer foodCategoryId;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "food", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<FoodNutrientConversionFactor> nutrientConversionFactors = new ArrayList<>();
 
-    public Integer getFdc_id() {
-        return fdc_id;
+    public Integer getFdcId() {
+        return fdcId;
     }
 
-    public void setFdc_id(Integer fdc_id) {
-        this.fdc_id = fdc_id;
+    public void setFdcId(Integer fdcId) {
+        this.fdcId = fdcId;
     }
 
     public String getDescription() {
@@ -33,6 +37,14 @@ public class Food {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Integer getFoodCategoryId() {
+        return foodCategoryId;
+    }
+
+    public void setFoodCategoryId(Integer foodCategoryId) {
+        this.foodCategoryId = foodCategoryId;
     }
 
     public List<FoodNutrientConversionFactor> getNutrientConversionFactors() {
@@ -44,6 +56,7 @@ public class Food {
     }
 
     public void addNutrientConversionFactor(FoodNutrientConversionFactor nutrient) {
+        nutrientConversionFactors.add(nutrient);
         nutrient.setFood(this);
     }
 }
