@@ -20,9 +20,11 @@ import java.util.stream.Collectors;
 public class FoodService {
 
     private final FoodRepository foodRepository;
+    private final FoodMapper foodMapper;
 
-    public FoodService(FoodRepository foodRepository) {
+    public FoodService(FoodRepository foodRepository, FoodMapper foodMapper) {
         this.foodRepository = foodRepository;
+        this.foodMapper = foodMapper;
     }
 
     /**
@@ -31,7 +33,7 @@ public class FoodService {
     public List<FoodDTO> getAllFoods() {
         return foodRepository.findAll()
                 .stream()
-                .map(FoodMapper::toDTO)
+                .map(foodMapper::toDTO) //.map(food -> foodMapper.toDTO(food))
                 .collect(Collectors.toList());
     }
 
@@ -40,7 +42,7 @@ public class FoodService {
      */
     public FoodDTO getFoodById(Integer fdcId) {
         return foodRepository.findById(fdcId)
-                .map(FoodMapper::toDTO)
+                .map(foodMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Food not found with fdcId " + fdcId
                 ));
@@ -68,6 +70,7 @@ public class FoodService {
     public FoodDTO searchBestByDescription(String description) {
         List<Food> foods = searchByDescriptionWords(description);
 
+
         return foods.stream()
                 .flatMap(food -> food.getNutrientConversionFactors().stream())
                 .filter(n -> n.getCalorieConversionFactor() != null)
@@ -80,7 +83,7 @@ public class FoodService {
                     if (c.getCarbohydrateValue() != null) count++;
                     return count; //higher count = better
                 }))
-                .map(n -> FoodMapper.toDTO(n.getFood()))
+                .map(n -> foodMapper.toDTO(n.getFood()))
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No food with macros found for: " + description
                 ));
