@@ -3,16 +3,13 @@ package com.dashboard.nutrition.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(
-        name = "food_category"
-)
+@Table(name = "food_category")
 public class FoodCategory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "code")
+    @Column(name = "code", nullable = false, unique = true)
     private Integer code;
 
     @Column(name = "description")
