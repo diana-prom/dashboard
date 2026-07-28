@@ -1,6 +1,11 @@
 # Nutrition Facts App
 
-Nutrition-Facts-App is a full-stack web application that provides detailed nutrition information about foods. It uses preloaded USDA FoodData to display macronutrients, portion sizes, food categories, and calculates total calories. The backend exposes endpoints for retrieving and aggregating this information.
+Nutrition Facts App is a full-stack web application that provides nutrition information using USDA FoodData Central. The application retrieves and aggregates food data through REST APIs to display macronutrients, portion sizes, food categories, and calculated calorie values.
+
+## Application Preview
+<img width="889" height="520" alt="Screenshot 2026-07-28 at 2 15 33 AM" src="https://github.com/user-attachments/assets/d2224ef4-ef56-4297-96f7-f06c7c5858f9" />
+
+Users can search foods and view nutrition information including macronutrients, serving sizes, categories, and calculated calorie values.
 
 # Table of Contents
 * [Features](#features)
@@ -27,6 +32,19 @@ Nutrition-Facts-App is a full-stack web application that provides detailed nutri
 - Docker: Containers for frontend (Nginx), backend (Spring Boot), and database
 - Data Source: USDA FoodData Central (preloaded in database)
 
+## Architecture
+
+The application follows a full-stack architecture:
+
+**Frontend**
+- JavaScript/React interface for searching and displaying nutrition information.
+
+**Backend**
+- Spring Boot REST API for retrieving and aggregating nutrition data.
+
+**Data Layer**
+- JPA/Hibernate manages object-relational mapping with the MySQL database.
+
 # Getting Started
    - Clone the repository
    - Build and run using Docker Compose
@@ -41,10 +59,10 @@ Access the app
    - MySQL database: localhost:3306, user: root, password: ******** 
 
 # Usage
-1. Browse foods or search for a specific food by name.
-2. Retrieve macronutrients, portion information, and food category.
-3. View calories per macronutrient and total calories calculated automatically.
-4. Use backend endpoints programmatically if needed.
+- Search for foods by name and retrieve detailed nutrition information.
+- View macronutrients, portion sizes, food categories, and calorie calculations..
+- See automatically calculated calories based on protein, fat, and carbohydrate values.
+- Access backend REST endpoints directly for programmatic use.
 
 # API
 - The backend exposes REST endpoints serving aggregated data from the database.
